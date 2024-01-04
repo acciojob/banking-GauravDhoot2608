@@ -1,7 +1,5 @@
 package com.driver;
 
-import java.util.HashMap;
-import java.util.PriorityQueue;
 
 public class CurrentAccount extends BankAccount{
     
@@ -34,67 +32,83 @@ public class CurrentAccount extends BankAccount{
         // If the license Id is valid, do nothing
         // If the characters of the license Id can be rearranged to create any valid license Id
         // If it is not possible, throw "Valid License can not be generated" Exception
-        if(!isValid(this.tradeLicenseId)){
-        	
-            String ans = orgString(this.tradeLicenseId);
-            if(ans.length()==0){
+
+        if(!isNumberValid(tradeLicenseId)){
+            String rearrangedId = arrangeString(tradeLicenseId);
+            if(rearrangedId == ""){
                 throw new Exception("Valid License can not be generated");
-            }
-            else{
-                this.tradeLicenseId=ans;
+            }else{
+                this.tradeLicenseId = rearrangedId;
             }
         }
     }
 
-    private boolean isValid(String s) {
-        for(int i=1;i<s.length();i++){
-            if(s.charAt(i-1)==s.charAt(i)){
+
+    public boolean isNumberValid(String licenseId){
+        for(int i=0; i<licenseId.length()-1; i++){
+            if(licenseId.charAt(i) == licenseId.charAt(i+1)){
                 return false;
             }
         }
         return true;
     }
 
-    class pair{
-        char ch;
-        int freq;
-        pair(char ch,int freq){
-            this.ch=ch;
-            this.freq=freq;
-        }
-    }
 
-    private String orgString(String s) {
-        HashMap<Character,Integer>map=new HashMap<>();
-        PriorityQueue<pair>pq=new PriorityQueue<>((a,b)->{
-            return a.freq > b.freq ? -1 : 1;
-        });
-        
-        StringBuilder sb=new StringBuilder();
-        for(char ch:s.toCharArray()){
-            map.put(ch,map.getOrDefault(ch,0)+1);
+    public String arrangeString(String s){
+        int n = s.length();
+
+        int[] count = new int[26];
+        for(int i=0;i<26;i++){
+            count[i] = 0;
         }
-        
-        for(char key:map.keySet()){
-            pq.add(new pair(key,map.get(key)));
+        for(char ch: s.toCharArray()){
+            count[(int)ch - (int)'A']++;
         }
-        pair prev=pq.remove();
-        sb.append(prev.ch);
-        prev.freq--;
-        while(pq.size()>0){
-        	
-            pair curr=pq.remove();
-            sb.append(curr.ch);
-            curr.freq--;
-            if(prev.freq>0){
-                pq.add(prev);
-            }
-            prev=curr;
-        }
-        if(sb.length()!=s.length()){
+
+        char ch_max = getCountChar(count);
+        int maxCount = count[(int)ch_max - (int)'A'];
+
+        if(maxCount > (n+1)/2){
             return "";
         }
-        return sb.toString();
+
+        String res = "";
+        for (int i = 0; i < n; i++) {
+            res += ' ';
+        }
+
+        int ind = 0;
+        while (maxCount > 0) {
+            res = res.substring(0, ind) + ch_max
+                    + res.substring(ind + 1);
+            ind = ind + 2;
+            maxCount--;
+        }
+        count[(int) ch_max - (int) 'A'] = 0;
+        for (int i = 0; i < 26; i++) {
+            while (count[i] > 0) {
+                ind = (ind >= n) ? 1 : ind;
+                res = res.substring(0, ind)
+                        + (char) ((int) 'A' + i)
+                        + res.substring(ind + 1);
+                ind += 2;
+                count[i]--;
+            }
+        }
+        return res;
+    }
+
+
+    public char getCountChar(int[] count){
+        int max = 0;
+        char ch = 0;
+        for(int i=0;i<26;i++){
+            if(count[i]>max){
+                max = count[i];
+                ch = (char)((int)'A' + i);
+            }
+        }
+        return ch;
     }
 
 }

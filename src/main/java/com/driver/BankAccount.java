@@ -2,9 +2,9 @@ package com.driver;
 
 public class BankAccount {
 
-    private String name;
-    private double balance;
-    private double minBalance;
+     String name;
+     double balance;
+     double minBalance;
 
     public BankAccount(String name, double balance, double minBalance) {
     	this.name = name;
@@ -41,11 +41,10 @@ public class BankAccount {
 
     public void withdraw(double amount) throws Exception {
         // Remember to throw "Insufficient Balance" exception, if the remaining amount would be less than minimum balance
-    	if((balance - amount) >= minBalance) {
-    		balance -= amount; 
-    	}else {
-    	    throw new Exception("Insufficient Balance");	
-    	}
+    	if(this.balance-amount < minBalance){
+            throw new Exception("Insufficient Balance");
+        }
+        this.balance-=amount;
     }
 
 	public String getName() {
